@@ -218,108 +218,71 @@ const usersArray = [{
 ];
 
 
-//logic for delete user in table by DeletButton
-const buttonForDelet = (elem) => {
-    elem.remove();
-}
 
-//logic for edit user in table by EditButton
-// you can change value of user property what you want
-const buttonForEdit = (buttonId) => {
-    let nameOfEditebleProperty = prompt("Enter the name of property what you want to edit")
-    let currentTr = document.getElementById(buttonId).parentElement.parentElement;
-    let currentElement = currentTr.querySelector(`td[id='${nameOfEditebleProperty}']`)
-    if (currentElement) {
-        let newValueOfEditebleProperty = prompt("Enter new value for property")
-        currentElement.textContent = newValueOfEditebleProperty;
-    } else {
-        alert("the property name entered by you is incorrect");
-    }
-
-}
-
-//logic for creat button in "inNodeName" element 
-//take event by name 
-const createButton = (buttonName, inNodeName, index) => {
-    let button = document.createElement('button');
-    button.textContent = buttonName;
-    button.id = index;
-    inNodeName.append(button);
-
-    if (buttonName == "Delete") {
-        button.onclick = () => {
-            buttonForDelet(inNodeName.parentElement);
-        };
-    }
-
-    if (buttonName == "Edit") {
-        button.onclick = () => {
-            buttonForEdit(button.id);
+const arrayCreator = (usersArray, ...args) => {
+    let array = [];
+    for (const object of usersArray) {
+        let tdElelment = document.createElement('td');
+        let divForTdElement = document.createElement('div');
+        for (const arg of args) {
+            divForTdElement.textContent += ` ${object[arg]}`;
         }
+        tdElelment.append(divForTdElement);
+        array.push(tdElelment);
     }
-    return button;
+    return array;
 }
 
-// the logic of creating the head of the table
-// based on the array and then appending it to the root
-const createHeader = (table, array) => {
+
+
+const setup = (usersArray) => {
+    let usersMap = new Map();
+
+    usersMap.set('name', arrayCreator(usersArray, 'name'));
+    usersMap.set('surname', arrayCreator(usersArray, 'surname'));
+    usersMap.set('age', arrayCreator(usersArray, 'age'));
+    usersMap.set('gender', arrayCreator(usersArray, 'gender'));
+    usersMap.set('email', arrayCreator(usersArray, 'email'));
+
+
+    return usersMap;
+}
+
+const createHeader = (usersMap, table) => {
     let theadElement = document.createElement('thead');
     let trElement = document.createElement('tr');
     theadElement.append(trElement);
-    table.append(theadElement);
-
-    let thElementControls = document.createElement('th');
-
-    const proprtiesHeaderName = Object.keys(array[0]);
-
-    for (const headerName of proprtiesHeaderName) {
-        let thElement = document.createElement('th');
-        thElement.textContent = headerName;
+    for (const key of usersMap.keys()) {
+        let thElement = document.createElement('th')
+        thElement.textContent = key;
         trElement.append(thElement);
     }
-
-    thElementControls.textContent = "Controls";
-
-    trElement.append(thElementControls);
+    table.append(theadElement);
 }
 
-// the logic of constructing the body of the table
-// based on the array and then appending it to the root
-const createBody = (table, array) => {
+const createBody = (usersMap, table) => {
     let tbodyElement = document.createElement('tbody');
     table.append(tbodyElement);
-    let index = 0;
-    for (const object of array) {
+
+    for (i = 0; i < usersMap.get('age').length; ++i) {
         let trElement = document.createElement('tr');
-        let buttonTdElement = document.createElement('td');
-
-        createButton('Edit', buttonTdElement, index);
-        createButton('Delete', buttonTdElement, index);
-
-        for (const [key, value] of Object.entries(object)) {
-            let tdElement = document.createElement('td');
-            tdElement.id = key;
-            tdElement.textContent = value;
-            trElement.append(tdElement);
-        }
-
-        trElement.append(buttonTdElement);
-
         tbodyElement.append(trElement);
-
-        ++index;
+        for (const value of usersMap.values()) {
+            trElement.append(value[i]);
+        }
     }
 }
 
-const render = (usersArray) => {
+
+const render = (usersMap) => {
     const root = document.querySelector('.root');
     let tableElement = document.createElement('table');
     tableElement.className += "Table";
     tableElement.className += " fl-table";
     root.append(tableElement);
 
-    createHeader(tableElement, usersArray);
-    createBody(tableElement, usersArray);
+    createHeader(usersMap, tableElement);
+    createBody(usersMap, tableElement);
 }
 
-render(usersArray);
+render(setup(usersArray));
